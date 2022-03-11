@@ -1,6 +1,6 @@
 # music_player
 
-A new Flutter project.
+A Minimilaistic Music Player for Android
 
 ## Getting Started
 
