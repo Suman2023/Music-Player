@@ -36,6 +36,7 @@ dependencies:
   just_audio: ^0.9.20
   file_picker: ^4.5.0
   sleek_circular_slider: ^2.0.1
+  font_awesome_flutter: ^9.2.0
 
 dev_dependencies:
   flutter_test:

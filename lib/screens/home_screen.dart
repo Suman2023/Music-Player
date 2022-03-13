@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/widgets/music_controller.dart';
 import 'package:path/path.dart';
@@ -95,16 +96,38 @@ class _MyHomePageState extends State<HomeScreen> {
               ),
               Positioned(
                 top: 10,
-                left: width * .075,
+                left: width * .175,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    height: height * .45,
-                    width: width * .85,
+                    height: height * .35,
+                    width: width * .65,
                     color: Colors.green,
                   ),
                 ),
               ),
+              Positioned(
+                top: height * .35 + 10,
+                left: width * .175,
+                child: Container(
+                  width: width * .65,
+                  color: Colors.transparent,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Song Name",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w700),
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                      ),
+                      Text("Artist"),
+                    ],
+                  ),
+                ),
+              ),
+
               // Positioned(
               //   top: height * .45 + 20,
               //   child: SizedBox(
@@ -178,7 +201,54 @@ class _MyHomePageState extends State<HomeScreen> {
               //   ),
               // ),
               Positioned(
-                  top: height * .45 + 20,
+                top: height * .45,
+                child: StreamBuilder<Duration>(
+                    stream: _player.positionStream,
+                    builder: (context, snapshot) {
+                      var seconds =
+                          (snapshot.data!.inMilliseconds % (60 * 1000)) / 1000;
+                      var duration =
+                          (_player.duration!.inMilliseconds % (60 * 1000)) /
+                              1000;
+                      return Container(
+                        width: width,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Row(
+                                children: [
+                                  FaIcon(
+                                    FontAwesomeIcons.play,
+                                    size: 12,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  // var
+                                  // return '${duration.inMinutes}m${seconds.toStringAsFixed(2)}s';
+                                  Text(snapshot.data == null
+                                      ? "00:00"
+                                      : snapshot.data!.inMinutes.toString() +
+                                          ":" +
+                                          seconds.toStringAsFixed(0))
+                                ],
+                              ),
+                              Text(_player.duration == null
+                                  ? "00:00"
+                                  : _player.duration!.inMinutes.toString() +
+                                      ":" +
+                                      duration.toStringAsFixed(0))
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+              Positioned(
+                  top: height * .5,
                   left: 0.5 * width - 150,
                   child: MusicController(
                     player: _player,
