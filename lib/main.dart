@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:music_player/screens/home_screen.dart';
+import 'package:music_player/widgets/music_controller.dart';
 
 void main() {
   runApp(const MyApp());

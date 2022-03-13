@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:music_player/widgets/music_controller.dart';
 import 'package:path/path.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -35,11 +36,13 @@ class _MyHomePageState extends State<HomeScreen> {
       //   type: FileType.custom,
       //   allowedExtensions: ['mp3'],
       // );
+
       String? result = await FilePicker.platform.getDirectoryPath();
 
       List<FileSystemEntity> entities =
           await Directory(result!).list().toList();
-
+      playlist.clear();
+      audioSource.clear();
       for (var file in entities) {
         if (extension(file.path) == ".mp3") {
           audioSource.add(AudioSource.uri(Uri.file(file.path)));
@@ -71,7 +74,11 @@ class _MyHomePageState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                    onPressed: () => selectDirPath(),
+                    onPressed: () {
+                      setState(() {
+                        selectDirPath();
+                      });
+                    },
                     child: Text("Select Music Location"))
               ],
             ),
@@ -98,78 +105,84 @@ class _MyHomePageState extends State<HomeScreen> {
                   ),
                 ),
               ),
+              // Positioned(
+              //   top: height * .45 + 20,
+              //   child: SizedBox(
+              //     width: width,
+              //     child: Row(
+              //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+              //       children: [
+              //         IconButton(onPressed: () {}, icon: Icon(Icons.loop)),
+              //         IconButton(
+              //             onPressed: () {}, icon: Icon(Icons.arrow_left)),
+              //         StreamBuilder<PlayerState>(
+              //             stream: _player.playerStateStream,
+              //             builder: (context, snapshot) {
+              //               var playerState = snapshot.data;
+              //               var processingState = playerState?.processingState;
+              //               var playing = playerState?.playing;
+              //               if (playing != true) {
+              //                 return IconButton(
+              //                     onPressed: () {
+              //                       _player.play();
+              //                     },
+              //                     icon: Icon(Icons.play_arrow));
+              //               } else if (processingState !=
+              //                   ProcessingState.completed) {
+              //                 return IconButton(
+              //                     onPressed: () {
+              //                       _player.pause();
+              //                     },
+              //                     icon: Icon(Icons.pause));
+              //               } else {
+              //                 return IconButton(
+              //                     onPressed: () {
+              //                       _player.effectiveIndices!.first;
+              //                     },
+              //                     icon: Icon(Icons.replay));
+              //               }
+              //             }),
+              //         IconButton(
+              //             onPressed: () {}, icon: Icon(Icons.arrow_right)),
+              //         IconButton(onPressed: () {}, icon: Icon(Icons.shuffle)),
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // Positioned(
+              //   top: height * .45 + 80,
+              //   right: width * .075,
+              //   child: Container(
+              //     color: Colors.blueGrey,
+              //     height: height * .5,
+              //     width: width * .85,
+              //     child: ListView.builder(
+              //         shrinkWrap: true,
+              //         itemCount: playlist.length,
+              //         itemBuilder: (_, index) => Container(
+              //                 child: ListTile(
+              //               leading: Icon(Icons.play_arrow),
+              //               title: Text(
+              //                 playlist[index],
+              //                 maxLines: 1,
+              //               ),
+              //               subtitle: Row(
+              //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              //                 children: [
+              //                   Text("artist name"),
+              //                   Text("album"),
+              //                 ],
+              //               ),
+              //               trailing: Icon(Icons.menu),
+              //             ))),
+              //   ),
+              // ),
               Positioned(
-                top: height * .45 + 20,
-                child: SizedBox(
-                  width: width,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      IconButton(onPressed: () {}, icon: Icon(Icons.loop)),
-                      IconButton(
-                          onPressed: () {}, icon: Icon(Icons.arrow_left)),
-                      StreamBuilder<PlayerState>(
-                          stream: _player.playerStateStream,
-                          builder: (context, snapshot) {
-                            var playerState = snapshot.data;
-                            var processingState = playerState?.processingState;
-                            var playing = playerState?.playing;
-                            if (playing != true) {
-                              return IconButton(
-                                  onPressed: () {
-                                    _player.play();
-                                  },
-                                  icon: Icon(Icons.play_arrow));
-                            } else if (processingState !=
-                                ProcessingState.completed) {
-                              return IconButton(
-                                  onPressed: () {
-                                    _player.pause();
-                                  },
-                                  icon: Icon(Icons.pause));
-                            } else {
-                              return IconButton(
-                                  onPressed: () {
-                                    _player.effectiveIndices!.first;
-                                  },
-                                  icon: Icon(Icons.replay));
-                            }
-                          }),
-                      IconButton(
-                          onPressed: () {}, icon: Icon(Icons.arrow_right)),
-                      IconButton(onPressed: () {}, icon: Icon(Icons.shuffle)),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                top: height * .45 + 80,
-                right: width * .075,
-                child: Container(
-                  color: Colors.blueGrey,
-                  height: height * .5,
-                  width: width * .85,
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: playlist.length,
-                      itemBuilder: (_, index) => Container(
-                              child: ListTile(
-                            leading: Icon(Icons.play_arrow),
-                            title: Text(
-                              playlist[index],
-                              maxLines: 1,
-                            ),
-                            subtitle: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text("artist name"),
-                                Text("album"),
-                              ],
-                            ),
-                            trailing: Icon(Icons.menu),
-                          ))),
-                ),
-              ),
+                  top: height * .45 + 20,
+                  left: 0.5 * width - 150,
+                  child: MusicController(
+                    player: _player,
+                  )),
             ],
           )),
     );
