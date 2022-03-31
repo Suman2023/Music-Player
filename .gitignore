@@ -49,7 +49,6 @@ app.*.map.json
 /android/app/release
 
 
-/android/key.properties
-/android/app/build.gradle
-
-android/*
+android/key.properties
+android/app/build.gradle
+android/app/src/main/AndroidManifest.xml
