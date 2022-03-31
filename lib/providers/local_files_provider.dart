@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:music_player/locator.dart';
 import 'package:music_player/services/local_file_service.dart';
@@ -23,6 +24,7 @@ final currentDirectoryProvider = StateProvider<String>((ref) {
 
 final allFilesProvider = Provider<List<String>>((ref) {
   var _playlist = ref.watch(filesLocatorProvider);
+  print("called");
   return _playlist.playlist;
 });
 
@@ -36,4 +38,10 @@ final getNameArtistProvider =
   result['artistname'] = artistNames != null ? artistNames[0] : null;
   result['clipart'] = _metadata.albumArt;
   return result;
+});
+
+final getALbumArtProvider =
+    FutureProvider.family<Uint8List?, String>((ref, String filePath) async {
+  Metadata _metadata = await MetadataRetriever.fromFile(File(filePath));
+  return _metadata.albumArt;
 });

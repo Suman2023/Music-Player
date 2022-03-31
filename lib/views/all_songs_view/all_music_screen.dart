@@ -14,6 +14,7 @@ class AllMusicScreen extends ConsumerWidget {
 
     final _currentIndex = ref.watch(currentIndexStreamProvider);
     final _allMusicFiles = ref.watch(allFilesProvider);
+    print(_allMusicFiles.length);
     return Scaffold(
       backgroundColor: Colors.red,
       appBar: AppBar(

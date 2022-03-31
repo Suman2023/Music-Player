@@ -6,8 +6,6 @@ import 'package:music_player/views/settings_view/settings_screen.dart';
 class AllRoutes {
   static Route<dynamic> generateRutes(RouteSettings setting) {
     switch (setting.name) {
-      case '/':
-        return MaterialPageRoute(builder: (_) => const AllMusicScreen());
       case 'home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case 'allmusic':

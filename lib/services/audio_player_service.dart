@@ -91,6 +91,14 @@ class AudioPlayerService {
     }
   }
 
+  int currentIndex() {
+    return _player.currentIndex!;
+  }
+
+  List<int>? getAllIndices() {
+    return _player.effectiveIndices;
+  }
+
   void stop() {
     player.stop();
   }

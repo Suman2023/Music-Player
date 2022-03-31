@@ -18,8 +18,8 @@ class HomeScreen extends ConsumerWidget {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
-    final playerStateStream = ref.watch(playerStateStreamProvider);
-    final currentIndex = ref.watch(currentIndexStreamProvider);
+    // final playerStateStream = ref.watch(playerStateStreamProvider);
+    // final currentIndex = ref.watch(currentIndexStreamProvider);
     final allMusicFiles = ref.watch(allFilesProvider);
 
     return Scaffold(
@@ -40,138 +40,141 @@ class HomeScreen extends ConsumerWidget {
             )
           ],
         ),
-        body: playerStateStream.when(
-            data: (_player) => Stack(
-                  children: [
-                    Container(
-                      height: height,
-                      width: width,
-                      color: Colors.red,
-                    ),
-                    Positioned(
-                      top: 10,
-                      left: width * .175,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child: SizedBox(
-                          height: height * .35,
-                          width: width * .65,
-                          // color: Colors.green,
-                          child: allMusicFiles.isNotEmpty &&
-                                  currentIndex.value != null
-                              ? FutureBuilder<Metadata>(
-                                  future: MetadataRetriever.fromFile(
-                                      File(allMusicFiles[currentIndex.value!])),
-                                  builder: (context,
-                                      AsyncSnapshot<Metadata> metadata) {
-                                    return metadata.data!.albumArt != null
-                                        ? Image.memory(
-                                            metadata.data!.albumArt!,
-                                            fit: BoxFit.fill,
-                                          )
-                                        : Image.asset(
-                                            "assets/images/batsy.jpg",
-                                            fit: BoxFit.fill,
-                                          );
-                                  })
-                              : Image.asset(
-                                  "assets/images/batsy.jpg",
-                                  fit: BoxFit.fill,
-                                ),
+        body: Stack(
+          children: [
+            Container(
+              height: height,
+              width: width,
+              color: Colors.red,
+            ),
+            Positioned(
+              top: 10,
+              left: width * .175,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: SizedBox(
+                  height: height * .35,
+                  width: width * .65,
+                  // color: Colors.green,
+                  child: allMusicFiles.isNotEmpty
+                      ? Consumer(builder: (context, ref, child) {
+                          final currentIndex =
+                              ref.watch(currentIndexStreamProvider);
+                          final getAlbumArt = ref.watch(getALbumArtProvider(
+                              allMusicFiles[currentIndex.value ?? 0]));
+                          return getAlbumArt.when(
+                              data: (_data) {
+                                return _data != null
+                                    ? Image.memory(
+                                        _data,
+                                        fit: BoxFit.fill,
+                                      )
+                                    : Image.asset(
+                                        "assets/images/batsy.jpg",
+                                        fit: BoxFit.fill,
+                                      );
+                              },
+                              error: (e, s) => Image.asset(
+                                    "assets/images/batsy.jpg",
+                                    fit: BoxFit.fill,
+                                  ),
+                              loading: () => Image.asset(
+                                    "assets/images/batsy.jpg",
+                                    fit: BoxFit.fill,
+                                  ));
+                        })
+                      : Image.asset(
+                          "assets/images/batsy.jpg",
+                          fit: BoxFit.fill,
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      top: height * .35 + 10,
-                      left: width * .175,
-                      child: Container(
-                        width: width * .65,
-                        color: Colors.transparent,
-                        child: Center(
-                          child: allMusicFiles.isNotEmpty &&
-                                  currentIndex.value != null
-                              ? FutureBuilder(
-                                  future: MetadataRetriever.fromFile(
-                                      File(allMusicFiles[currentIndex.value!])),
-                                  builder: (context,
-                                      AsyncSnapshot<Metadata> metadata) {
-                                    return metadata.hasData
-                                        ? getTitleWidget(
-                                            name:
-                                                metadata.data!.trackName == null
-                                                    ? "Unknown"
-                                                    : metadata.data!.trackName!,
-                                            artist: metadata.data!
-                                                        .trackArtistNames ==
-                                                    null
-                                                ? "Unknown"
-                                                : metadata
-                                                    .data!.trackArtistNames![0])
-                                        : getTitleWidget();
-                                  })
-                              : getTitleWidget(),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: height * .45,
-                      child: SizedBox(
-                        width: width,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child:
-                              Consumer(builder: (context, currentRef, child) {
-                            final positionStream =
-                                currentRef.watch(currentPositionProvider);
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Row(
-                                  children: [
-                                    FaIcon(
-                                      FontAwesomeIcons.play,
-                                      size: 12,
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    // var
-                                    // return '${duration.inMinutes}m${seconds.toStringAsFixed(2)}s';
-                                    positionStream.when(
-                                        data: (_position) {
-                                          // Duration duration = Duration(
-                                          //     milliseconds: _position.toInt());
-                                          // ;
-                                          return Text(_position
-                                              .toString()
-                                              .split('.')[0]
-                                              .toString());
-                                        },
-                                        error: (_, __) => Text("00:00"),
-                                        loading: () => Text("00:00"))
-                                  ],
-                                ),
-                                Text(player.player.duration == null
-                                    ? "0:00:00"
-                                    : player.player.duration
-                                        .toString()
-                                        .split('.')[0]
-                                        .toString()),
-                              ],
-                            );
-                          }),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                        top: height * .5,
-                        left: 0.5 * width - 150,
-                        child: MusicController()),
-                  ],
                 ),
-            error: (e, s) => Text(e.toString()),
-            loading: () => CircularProgressIndicator()));
+              ),
+            ),
+            Positioned(
+              top: height * .35 + 10,
+              left: width * .175,
+              child: Container(
+                width: width * .65,
+                color: Colors.transparent,
+                child: Center(
+                  child: allMusicFiles.isNotEmpty
+                      ? Consumer(builder: (context, ref, child) {
+                          final currentIndex =
+                              ref.watch(currentIndexStreamProvider);
+                          final musicDetails = ref.watch(getNameArtistProvider(
+                              allMusicFiles[currentIndex.value ?? 0]));
+                          return musicDetails.when(
+                              data: (_data) {
+                                return getTitleWidget(
+                                    name: _data['trackname'] ?? "Unknown",
+                                    artist: _data["artistname"] ?? "Unknown");
+                              },
+                              error: (_, __) => getTitleWidget(),
+                              loading: () => getTitleWidget());
+                        })
+                      : getTitleWidget(),
+                ),
+              ),
+            ),
+            Positioned(
+              top: height * .45,
+              child: SizedBox(
+                width: width,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Consumer(builder: (context, currentRef, child) {
+                    final positionStream =
+                        currentRef.watch(currentPositionProvider);
+                    final _playerState = ref.watch(playerStateStreamProvider);
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Row(
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.play,
+                              size: 12,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            // var
+                            // return '${duration.inMinutes}m${seconds.toStringAsFixed(2)}s';
+                            positionStream.when(
+                                data: (_position) {
+                                  // Duration duration = Duration(
+                                  //     milliseconds: _position.toInt());
+                                  // ;
+                                  return Text(_position
+                                      .toString()
+                                      .split('.')[0]
+                                      .toString());
+                                },
+                                error: (_, __) => Text("00:00"),
+                                loading: () => Text("00:00"))
+                          ],
+                        ),
+                        Text(player.player.duration == null
+                            ? "0:00:00"
+                            : player.player.duration
+                                .toString()
+                                .split('.')[0]
+                                .toString()),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            ),
+            Positioned(
+                top: height * .5,
+                left: 0.5 * width - 150,
+                child: MusicController()),
+          ],
+        ));
+    // error: (e, s) => Text(e.toString()),
+    // loading: () => CircularProgressIndicator()));
   }
 
   Widget getTitleWidget({String name = "Unknown", String artist = "Unknown"}) {

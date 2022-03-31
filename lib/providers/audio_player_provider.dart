@@ -37,6 +37,7 @@ final currentVolumeStreamProvider = StreamProvider<double>((ref) async* {
 
 final currentIndexStreamProvider = StreamProvider<int?>((ref) async* {
   var currentPlayer = ref.watch(playerProvider);
+
   await for (int? index in currentPlayer.player.currentIndexStream) {
     yield index;
   }

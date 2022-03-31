@@ -35,7 +35,7 @@ class LocalFileService {
     List<String> cacheFilesList = await _box.get("currentFiles");
     if (cacheFilesList.isEmpty) {
       List<FileSystemEntity> entities =
-          await Directory(_directoryPath!).list().toList();
+          await Directory(directoryPath).list().toList();
       _playlist.clear();
       for (var file in entities) {
         if (extension(file.path) == ".mp3") {
@@ -49,7 +49,7 @@ class LocalFileService {
     if (!onlyMusicFiles) {
       await locator<AudioPlayerService>().initialiseSources(_playlist);
     }
-
+    print(_playlist.length);
     return _playlist;
   }
 }

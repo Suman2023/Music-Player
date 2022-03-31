@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:music_player/locator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:music_player/services/local_file_service.dart';
 import 'package:music_player/utils/routes.dart';
 
 void main() async {
@@ -22,10 +23,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Box box = Hive.box("musicplayerdata");
+  final _fileLocator = locator<LocalFileService>();
   @override
   void initState() {
-    // TODO: implement initState
-    box.clear();
+    // box.clear();
+    if (box.get("directory") == null || box.get("directory") == "") {
+      _fileLocator.pickFolder();
+    } else if (box.get("directory") != "") {
+      _fileLocator.getMusicFiles();
+    }
     super.initState();
   }
 
@@ -38,7 +44,7 @@ class _MyAppState extends State<MyApp> {
         primarySwatch: Colors.blue,
       ),
       onGenerateRoute: AllRoutes.generateRutes,
-      initialRoute: '/',
+      initialRoute: 'home',
       // home: Testing(),
     );
   }
