@@ -52,4 +52,4 @@ app.*.map.json
 /android/key.properties
 /android/app/build.gradle
 
-/android/*
+android/*
