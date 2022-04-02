@@ -18,7 +18,7 @@ class LocalFileService {
     return _box.get("directory");
   }
 
-  List<String> get playlist => _playlist;
+  Future<List<String>> get playlist async => await _box.get("currentFiles");
 
   Future<String?> pickFolder() async {
     _directoryPath = await FilePicker.platform.getDirectoryPath();
@@ -35,7 +35,7 @@ class LocalFileService {
     List<String> cacheFilesList = await _box.get("currentFiles");
     if (cacheFilesList.isEmpty) {
       List<FileSystemEntity> entities =
-          await Directory(directoryPath).list().toList();
+          await Directory(directoryPath).list(recursive: true).toList();
       _playlist.clear();
       for (var file in entities) {
         if (extension(file.path) == ".mp3") {

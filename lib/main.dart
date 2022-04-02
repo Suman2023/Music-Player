@@ -28,6 +28,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // box.clear();
     if (box.get("directory") == null || box.get("directory") == "") {
+      box.put("currentFiles", <String>[]);
       _fileLocator.pickFolder();
     } else if (box.get("directory") != "") {
       _fileLocator.getMusicFiles();

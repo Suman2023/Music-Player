@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
@@ -10,10 +12,11 @@ class MusicController extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final playerState = ref.watch(playerStateStreamProvider);
-    final positionStream = ref.watch(currentPositionProvider);
+    //
     final player = ref.watch(playerProvider);
     final currentVolume = ref.watch(currentVolumeStreamProvider);
+
+    print("Music COntroller rebuilt");
     return Container(
       height: 300,
       width: 300,
@@ -38,33 +41,38 @@ class MusicController extends ConsumerWidget {
             ),
             // child:
           ),
-          SleekCircularSlider(
-              initialValue: positionStream.value == null
-                  ? 0.0
-                  : positionStream.value!.inMilliseconds.toDouble(),
-              min: 0.0,
-              max: player.player.duration != null
-                  ? player.player.duration!.inMilliseconds.toDouble()
-                  : 100,
-              appearance: CircularSliderAppearance(
-                customWidths: CustomSliderWidths(
-                  handlerSize: 5,
-                  trackWidth: 0,
-                  progressBarWidth: 5,
-                  shadowWidth: 0,
+          Consumer(builder: (context, ref, child) {
+            final _duration = ref.watch(currentPositionProvider);
+            print(_duration.value ?? "");
+            return SleekCircularSlider(
+                initialValue: _duration.value == null
+                    ? 0.0
+                    : _duration.value!.inMilliseconds.toDouble(),
+                // initialValue: 0.0,
+                min: 0.0,
+                max: player.player.duration != null
+                    ? player.player.duration!.inMilliseconds.toDouble()
+                    : 100,
+                appearance: CircularSliderAppearance(
+                  customWidths: CustomSliderWidths(
+                    handlerSize: 5,
+                    trackWidth: 0,
+                    progressBarWidth: 5,
+                    shadowWidth: 0,
+                  ),
+                  customColors: CustomSliderColors(
+                      trackColor: Colors.transparent, dotColor: Colors.yellow),
+                  size: 300,
+                  startAngle: 0,
+                  angleRange: 360,
                 ),
-                customColors: CustomSliderColors(
-                    trackColor: Colors.transparent, dotColor: Colors.yellow),
-                size: 300,
-                startAngle: 0,
-                angleRange: 360,
-              ),
-              innerWidget: (hello) => Container(),
-              onChangeEnd: (newPos) {
-                // player.player
-                //   .seek(Duration(milliseconds: newPos.toInt()));
-                player.seekToPosition(newPos);
-              }),
+                innerWidget: (hello) => Container(),
+                onChangeEnd: (newPos) {
+                  // player.player
+                  //   .seek(Duration(milliseconds: newPos.toInt()));
+                  player.seekToPosition(newPos);
+                });
+          }),
           currentVolume.when(
               data: (_volume) => SleekCircularSlider(
                     initialValue: _volume,
@@ -126,31 +134,37 @@ class MusicController extends ConsumerWidget {
                     ),
                     innerWidget: (hello) => Container(),
                   )),
-          playerState.when(
-              data: (_data) {
-                return _data.playing
-                    ? IconButton(
-                        onPressed: () {
-                          player.pause();
-                        },
-                        icon: const Icon(Icons.pause))
-                    : _data.processingState != ProcessingState.completed
+          Consumer(
+            builder: (context, ref, child) {
+              final playerState = ref.watch(playerStateStreamProvider);
+              print("music controller");
+              return playerState.when(
+                  data: (_data) {
+                    return _data.playing
                         ? IconButton(
                             onPressed: () {
-                              player.player.play();
+                              player.pause();
                             },
-                            icon: const Icon(Icons.play_arrow))
-                        : IconButton(
-                            onPressed: () {
-                              player.player.play();
-                            },
-                            icon: const Icon(Icons.replay));
-              },
-              error: (e, _) => IconButton(
-                    icon: const Icon(Icons.play_arrow),
-                    onPressed: () {},
-                  ),
-              loading: () => const CircularProgressIndicator()),
+                            icon: const Icon(Icons.pause))
+                        : _data.processingState != ProcessingState.completed
+                            ? IconButton(
+                                onPressed: () {
+                                  player.player.play();
+                                },
+                                icon: const Icon(Icons.play_arrow))
+                            : IconButton(
+                                onPressed: () {
+                                  player.player.play();
+                                },
+                                icon: const Icon(Icons.replay));
+                  },
+                  error: (e, _) => IconButton(
+                        icon: const Icon(Icons.play_arrow),
+                        onPressed: () {},
+                      ),
+                  loading: () => const CircularProgressIndicator());
+            },
+          ),
           Positioned(
             top: 10,
             child: Container(
@@ -160,6 +174,7 @@ class MusicController extends ConsumerWidget {
               child: IconButton(
                   onPressed: () {
                     player.changeVolume('+');
+                    player.shuffleIndices();
                   },
                   icon: const FaIcon(FontAwesomeIcons.plus)),
             ),

@@ -5,7 +5,14 @@ import 'package:music_player/services/audio_player_service.dart';
 
 final player = locator<AudioPlayerService>();
 
-final playerProvider = Provider<AudioPlayerService>((ref) => player);
+final playerProvider =
+    Provider.autoDispose<AudioPlayerService>((ref) => player);
+
+final playerLoopModeProvider =
+    StateProvider<LoopMode>((ref) => player.currentLoopMode());
+
+final playerShuffleModeStateProvider =
+    StateProvider<bool>((ref) => player.currentShuffleMode());
 
 final playerStateStreamProvider =
     StreamProvider.autoDispose<PlayerState>((ref) async* {
@@ -17,25 +24,32 @@ final playerStateStreamProvider =
 
 //positionSTream
 
-final currentPositionProvider = StreamProvider<Duration>((ref) async* {
+final currentPositionProvider =
+    StreamProvider.autoDispose<Duration>((ref) async* {
   var currentPlayer = ref.watch(playerProvider);
-  await for (Duration duration in currentPlayer.player.positionStream) {
-    // double mill = duration.inMilliseconds.toDouble();
+  var stream = currentPlayer.player.createPositionStream(
+      minPeriod: Duration(seconds: 1), maxPeriod: Duration(seconds: 1));
+
+  await for (var duration in stream) {
     yield duration;
   }
+  // yield stream.;
 });
 
 //durationStreamar
 
-final currentVolumeStreamProvider = StreamProvider<double>((ref) async* {
+final currentVolumeStreamProvider =
+    StreamProvider.autoDispose<double>((ref) async* {
   var currentPlayer = ref.watch(playerProvider);
+
   await for (double volume in currentPlayer.player.volumeStream) {
     yield volume;
   }
 });
 //indexStream
 
-final currentIndexStreamProvider = StreamProvider<int?>((ref) async* {
+final currentIndexStreamProvider =
+    StreamProvider.autoDispose<int?>((ref) async* {
   var currentPlayer = ref.watch(playerProvider);
 
   await for (int? index in currentPlayer.player.currentIndexStream) {
@@ -44,3 +58,8 @@ final currentIndexStreamProvider = StreamProvider<int?>((ref) async* {
 });
 
 //
+
+final positionProvider = StateProvider.autoDispose<Duration>((ref) {
+  var player = ref.watch(playerProvider);
+  return player.player.position;
+});

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:music_player/locator.dart';
 import 'package:music_player/services/local_file_service.dart';
 import 'package:riverpod/riverpod.dart';
@@ -22,10 +23,11 @@ final currentDirectoryProvider = StateProvider<String>((ref) {
   return dir.directoryPath;
 });
 
-final allFilesProvider = Provider<List<String>>((ref) {
-  var _playlist = ref.watch(filesLocatorProvider);
+final allFilesProvider =
+    FutureProvider.family<List<String>, String>((ref, String path) {
+  var _filesLocator = ref.watch(filesLocatorProvider);
   print("called");
-  return _playlist.playlist;
+  return _filesLocator.playlist;
 });
 
 final getNameArtistProvider =
@@ -33,7 +35,8 @@ final getNameArtistProvider =
         (ref, String filePath) async {
   Map<String, dynamic> result = {};
   Metadata _metadata = await MetadataRetriever.fromFile(File(filePath));
-  result['trackname'] = _metadata.trackName;
+  result['trackname'] =
+      _metadata.trackName ?? filePath.split('/').last.split('.')[0];
   var artistNames = _metadata.trackArtistNames;
   result['artistname'] = artistNames != null ? artistNames[0] : null;
   result['clipart'] = _metadata.albumArt;

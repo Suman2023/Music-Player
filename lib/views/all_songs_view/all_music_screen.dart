@@ -12,9 +12,12 @@ class AllMusicScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     double width = MediaQuery.of(context).size.width;
 
-    final _currentIndex = ref.watch(currentIndexStreamProvider);
-    final _allMusicFiles = ref.watch(allFilesProvider);
-    print(_allMusicFiles.length);
+    //
+    final _fileLocator = ref.watch(filesLocatorProvider);
+    final _allMusicFilesProvider =
+        ref.watch(allFilesProvider(_fileLocator.directoryPath));
+    print("all music rebuilt");
+
     return Scaffold(
       backgroundColor: Colors.red,
       appBar: AppBar(
@@ -34,39 +37,54 @@ class AllMusicScreen extends ConsumerWidget {
           )
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-              height: 100,
-              width: width,
-              // color: Colors.red,
-              child: _allMusicFiles.isNotEmpty && _currentIndex.value != null
-                  ? currentlyPlayingWidget(
-                      100, width, _allMusicFiles[_currentIndex.value ?? 0])
-                  : currentlyPlayingWidget(100, width, ""),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              color: Colors.red,
-              child: _allMusicFiles.isNotEmpty
-                  ? ListView.builder(
-                      itemCount: _allMusicFiles.length,
-                      itemBuilder: (context, index) {
-                        return listItemConsumer(
-                            height: 50,
-                            file: _allMusicFiles[index],
-                            index: index);
-                      })
-                  : const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-            ),
-          )
-        ],
-      ),
+      body: _allMusicFilesProvider.when(
+          data: (_allMusicFiles) {
+            print("running");
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    height: 100,
+                    width: width,
+                    // color: Colors.red,
+                    child: Consumer(builder: (context, ref, child) {
+                      final _currentIndex =
+                          ref.watch(currentIndexStreamProvider);
+                      return _allMusicFiles.isNotEmpty &&
+                              _currentIndex.value != null
+                          ? currentlyPlayingWidget(100, width,
+                              _allMusicFiles[_currentIndex.value ?? 0])
+                          : currentlyPlayingWidget(100, width, "");
+                    }),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    color: Colors.red,
+                    child: _allMusicFiles.isNotEmpty
+                        ? ListView.builder(
+                            itemCount: _allMusicFiles.length,
+                            itemBuilder: (context, index) {
+                              // print(index.toString());
+                              return listItemConsumer(
+                                  height: 50,
+                                  file: _allMusicFiles[index],
+                                  index: index);
+                            })
+                        : const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                  ),
+                )
+              ],
+            );
+          },
+          loading: () => Center(
+                child: CircularProgressIndicator(),
+              ),
+          error: (e, s) => Center(
+              child: Text("Something went wrong try selecting folder agian!"))),
     );
   }
 

@@ -40,7 +40,6 @@ class AudioPlayerService {
   // }
 
   void play() {
-    _count++;
     if (_player.audioSource != null) {
       _player.play();
     } else {
@@ -53,6 +52,7 @@ class AudioPlayerService {
 
   void playAtIndex(Duration duration, int index) {
     _player.seek(duration, index: index);
+    _player.play();
   }
 
   void pause() {
@@ -97,6 +97,36 @@ class AudioPlayerService {
 
   List<int>? getAllIndices() {
     return _player.effectiveIndices;
+  }
+
+  void shuffleIndices() {
+    _player.shuffle();
+  }
+
+  void setLoopMode() {
+    if (_player.loopMode == LoopMode.all) {
+      _player.setLoopMode(LoopMode.off);
+    } else if (_player.loopMode == LoopMode.one) {
+      _player.setLoopMode(LoopMode.all);
+    } else {
+      _player.setLoopMode(LoopMode.one);
+    }
+  }
+
+  LoopMode currentLoopMode() {
+    return _player.loopMode;
+  }
+
+  void setShuffleMode() {
+    if (_player.shuffleModeEnabled) {
+      _player.setShuffleModeEnabled(false);
+    } else {
+      _player.setShuffleModeEnabled(true);
+    }
+  }
+
+  bool currentShuffleMode() {
+    return _player.shuffleModeEnabled;
   }
 
   void stop() {
