@@ -11,7 +11,6 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: Colors.red,
           leading: Center(
             child: IconButton(
                 onPressed: () => Navigator.pushNamed(context, "allmusic"),

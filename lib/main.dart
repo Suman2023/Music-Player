@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:music_player/color_pallete/all_colors.dart';
 import 'package:music_player/locator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:music_player/services/local_file_service.dart';
@@ -38,12 +39,18 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final _colorsScheme = locator<AppColorsScheme>();
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.blue,
+          scaffoldBackgroundColor: _colorsScheme.scaffoldColor,
+          appBarTheme: AppBarTheme(backgroundColor: _colorsScheme.appBarColor),
+          popupMenuTheme: PopupMenuThemeData(
+              color: _colorsScheme.scaffoldColor,
+              textStyle: TextStyle(color: _colorsScheme.searchColor))),
+
       onGenerateRoute: AllRoutes.generateRutes,
       initialRoute: 'home',
       // home: Testing(),

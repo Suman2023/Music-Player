@@ -26,7 +26,7 @@ final currentDirectoryProvider = StateProvider<String>((ref) {
 final allFilesProvider =
     FutureProvider.family<List<String>, String>((ref, String path) {
   var _filesLocator = ref.watch(filesLocatorProvider);
-  print("called");
+  // print("called");
   return _filesLocator.playlist;
 });
 

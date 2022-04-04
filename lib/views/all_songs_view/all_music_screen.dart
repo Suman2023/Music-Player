@@ -3,13 +3,44 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:music_player/color_pallete/all_colors.dart';
+import 'package:music_player/locator.dart';
 import 'package:music_player/providers/audio_player_provider.dart';
 import 'package:music_player/providers/local_files_provider.dart';
+import 'package:music_player/providers/widget_animations_controller.dart';
 
-class AllMusicScreen extends ConsumerWidget {
+class AllMusicScreen extends ConsumerStatefulWidget {
   const AllMusicScreen({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() => _AllMusicScreenState();
+}
+
+class _AllMusicScreenState extends ConsumerState<AllMusicScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _playPauseController;
+
+  final _colorScheme = locator<AppColorsScheme>();
+  @override
+  void initState() {
+    super.initState();
+    _playPauseController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    ref.read(isPlayingStateProvider.state).state
+        ? _playPauseController.forward()
+        : _playPauseController.reverse();
+  }
+
+  @override
+  void dispose() {
+    _playPauseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
 
     //
@@ -19,10 +50,8 @@ class AllMusicScreen extends ConsumerWidget {
     print("all music rebuilt");
 
     return Scaffold(
-      backgroundColor: Colors.red,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.red,
         leading: Center(
           child: IconButton(
               onPressed: () => Navigator.pushNamed(context, "home"),
@@ -47,7 +76,6 @@ class AllMusicScreen extends ConsumerWidget {
                   child: SizedBox(
                     height: 100,
                     width: width,
-                    // color: Colors.red,
                     child: Consumer(builder: (context, ref, child) {
                       final _currentIndex =
                           ref.watch(currentIndexStreamProvider);
@@ -61,7 +89,7 @@ class AllMusicScreen extends ConsumerWidget {
                 ),
                 Expanded(
                   child: Container(
-                    color: Colors.red,
+                    color: _colorScheme.allMusicListViewConatinerColor,
                     child: _allMusicFiles.isNotEmpty
                         ? ListView.builder(
                             itemCount: _allMusicFiles.length,
@@ -150,8 +178,8 @@ class AllMusicScreen extends ConsumerWidget {
                       trackname,
                       overflow: TextOverflow.clip,
                       maxLines: 1,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 18),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       // textAlign: TextAlign.center,
                     ),
               artistName == null
@@ -168,19 +196,29 @@ class AllMusicScreen extends ConsumerWidget {
         Consumer(builder: (context, ref, child) {
           final _player = ref.watch(playerProvider);
           final _playerStateProvider = ref.watch(playerStateStreamProvider);
+          final _isPlayingState = ref.watch(isPlayingStateProvider.state);
           return _playerStateProvider.when(
-              data: (_playerState) {
-                return _playerState.playing
-                    ? IconButton(
-                        onPressed: () {
-                          _player.pause();
-                        },
-                        icon: const FaIcon(FontAwesomeIcons.pauseCircle))
-                    : IconButton(
-                        onPressed: () {
-                          _player.play();
-                        },
-                        icon: const FaIcon(FontAwesomeIcons.playCircle));
+              data: (_data) {
+                return IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    _data.playing
+                        ? {
+                            _playPauseController.reverse(),
+                            player.pause(),
+                            _isPlayingState.state = false,
+                          }
+                        : {
+                            _playPauseController.forward(),
+                            player.play(),
+                            _isPlayingState.state = true,
+                          };
+                  },
+                  icon: AnimatedIcon(
+                    icon: AnimatedIcons.play_pause,
+                    progress: _playPauseController,
+                  ),
+                );
               },
               error: (e, s) => IconButton(
                   onPressed: () {},
@@ -239,24 +277,42 @@ class AllMusicScreen extends ConsumerWidget {
                   )),
       ),
       title: trackname == null
-          ? const Text("Unknown")
+          ? Text(
+              "Unknown",
+              overflow: TextOverflow.clip,
+              maxLines: 1,
+              style: TextStyle(
+                  color: _colorScheme.allMusicListSongNameColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18),
+            )
           : Text(
               trackname,
               overflow: TextOverflow.clip,
               maxLines: 1,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: TextStyle(
+                  color: _colorScheme.allMusicListSongNameColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18),
               // textAlign: TextAlign.center,
             ),
       subtitle: artistname == null
-          ? const Text("Unknown")
+          ? Text(
+              "Unknown",
+              overflow: TextOverflow.clip,
+              maxLines: 1,
+              style: TextStyle(color: _colorScheme.allMusicListArtistNameColor),
+            )
           : Text(
               artistname,
               overflow: TextOverflow.clip,
               maxLines: 1,
+              style: TextStyle(color: _colorScheme.allMusicListArtistNameColor),
               // textAlign: TextAlign.center,
             ),
       trailing: Consumer(builder: (context, ref, child) {
         final _currentPlayer = ref.watch(playerProvider);
+        final _isPlayingState = ref.watch(isPlayingStateProvider.state);
         return PopupMenuButton(
           initialValue: "play",
           itemBuilder: (_) => <PopupMenuItem<String>>[
@@ -273,6 +329,9 @@ class AllMusicScreen extends ConsumerWidget {
             if (newVal == "play") {
               _currentPlayer.playAtIndex(
                   const Duration(seconds: 0), index ?? 0);
+              _playPauseController.forward();
+
+              _isPlayingState.state = true;
             }
           },
         );

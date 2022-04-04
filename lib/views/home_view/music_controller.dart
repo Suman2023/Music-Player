@@ -3,15 +3,47 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:music_player/color_pallete/all_colors.dart';
+import 'package:music_player/locator.dart';
 import 'package:music_player/providers/audio_player_provider.dart';
+import 'package:music_player/providers/widget_animations_controller.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class MusicController extends ConsumerWidget {
+class MusicController extends ConsumerStatefulWidget {
   const MusicController({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _MusicControllerState();
+}
+
+class _MusicControllerState extends ConsumerState<MusicController>
+    with TickerProviderStateMixin {
+  late AnimationController _playPauseController;
+
+  final _colorScheme = locator<AppColorsScheme>();
+  @override
+  void initState() {
+    super.initState();
+    _playPauseController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    ref.read(isPlayingStateProvider.state).state
+        ? _playPauseController.forward()
+        : _playPauseController.reverse();
+  }
+
+  @override
+  void dispose() {
+    _playPauseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     //
     final player = ref.watch(playerProvider);
     final currentVolume = ref.watch(currentVolumeStreamProvider);
@@ -21,7 +53,8 @@ class MusicController extends ConsumerWidget {
       height: 300,
       width: 300,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(150), color: Colors.blueAccent),
+          borderRadius: BorderRadius.circular(150),
+          color: _colorScheme.outerCircleColor),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -30,20 +63,21 @@ class MusicController extends ConsumerWidget {
               width: 300 / 2,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(150),
-                color: Colors.blueGrey,
+                color: _colorScheme.midCircleColor,
               )),
           Container(
             height: 150 / 2,
             width: 150 / 2,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(150),
-              color: Colors.green,
+              color: _colorScheme.innerrCircleColor,
             ),
             // child:
           ),
           Consumer(builder: (context, ref, child) {
             final _duration = ref.watch(currentPositionProvider);
             print(_duration.value ?? "");
+            print("consumer");
             return SleekCircularSlider(
                 initialValue: _duration.value == null
                     ? 0.0
@@ -137,26 +171,32 @@ class MusicController extends ConsumerWidget {
           Consumer(
             builder: (context, ref, child) {
               final playerState = ref.watch(playerStateStreamProvider);
+              final _isPlayingState = ref.watch(isPlayingStateProvider.state);
               print("music controller");
               return playerState.when(
                   data: (_data) {
-                    return _data.playing
-                        ? IconButton(
-                            onPressed: () {
-                              player.pause();
-                            },
-                            icon: const Icon(Icons.pause))
-                        : _data.processingState != ProcessingState.completed
-                            ? IconButton(
-                                onPressed: () {
-                                  player.player.play();
-                                },
-                                icon: const Icon(Icons.play_arrow))
-                            : IconButton(
-                                onPressed: () {
-                                  player.player.play();
-                                },
-                                icon: const Icon(Icons.replay));
+                    return IconButton(
+                      color: _colorScheme.songControllerColor,
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        _data.playing
+                            ? {
+                                _playPauseController.reverse(),
+                                player.pause(),
+                                _isPlayingState.state = false,
+                              }
+                            : {
+                                _playPauseController.forward(),
+                                player.play(),
+                                _isPlayingState.state = true,
+                              };
+                      },
+                      icon: AnimatedIcon(
+                        icon: AnimatedIcons.play_pause,
+                        progress: _playPauseController,
+                        size: 36,
+                      ),
+                    );
                   },
                   error: (e, _) => IconButton(
                         icon: const Icon(Icons.play_arrow),
@@ -172,6 +212,7 @@ class MusicController extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(5),
               ),
               child: IconButton(
+                  color: _colorScheme.songControllerColor,
                   onPressed: () {
                     player.changeVolume('+');
                     player.shuffleIndices();
@@ -188,6 +229,7 @@ class MusicController extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: IconButton(
+                  color: _colorScheme.songControllerColor,
                   onPressed: () {
                     player.playPrevious();
                   },
@@ -201,6 +243,7 @@ class MusicController extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: IconButton(
+                  color: _colorScheme.songControllerColor,
                   onPressed: () {
                     player.playNext();
                   },
@@ -214,6 +257,7 @@ class MusicController extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(5),
               ),
               child: IconButton(
+                  color: _colorScheme.songControllerColor,
                   onPressed: () {
                     player.changeVolume('-');
                   },

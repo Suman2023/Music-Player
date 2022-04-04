@@ -6,17 +6,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:music_player/color_pallete/all_colors.dart';
+import 'package:music_player/locator.dart';
 import 'package:music_player/providers/audio_player_provider.dart';
 
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:music_player/providers/local_files_provider.dart';
 import 'package:music_player/views/home_view/music_controller.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final _colorScheme = locator<AppColorsScheme>();
+  @override
+  Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
@@ -25,24 +33,28 @@ class HomeScreen extends ConsumerWidget {
     final _fileLocator = ref.watch(filesLocatorProvider);
     final _allMusicFilesProvider =
         ref.watch(allFilesProvider(_fileLocator.directoryPath));
+    final currentIndex = ref.watch(currentIndexStreamProvider);
 
     print("Home Screen Rebuilt");
 
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: Colors.red,
           leading: Center(
             child: IconButton(
-                onPressed: () => Navigator.pushNamed(context, "settings"),
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, "settings"),
                 icon: const FaIcon(FontAwesomeIcons.chevronLeft)),
           ),
-          title: const Center(child: Text("Music Player")),
+          title: GestureDetector(
+              onTap: () => Navigator.pushReplacementNamed(context, 'search'),
+              child: Center(child: Text("Music Player"))),
           actions: [
             Center(
               child: IconButton(
-                  onPressed: () =>
-                      Navigator.pushReplacementNamed(context, "allmusic"),
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, "allmusic");
+                  },
                   icon: const FaIcon(FontAwesomeIcons.chevronRight)),
             )
           ],
@@ -53,7 +65,7 @@ class HomeScreen extends ConsumerWidget {
                     Container(
                       height: height,
                       width: width,
-                      color: Colors.red,
+                      // color: Colors.red,
                     ),
                     Positioned(
                       top: 10,
@@ -66,8 +78,6 @@ class HomeScreen extends ConsumerWidget {
                           // color: Colors.green,
                           child: allMusicFiles.isNotEmpty
                               ? Consumer(builder: (context, ref, child) {
-                                  final currentIndex =
-                                      ref.watch(currentIndexStreamProvider);
                                   final getAlbumArt = ref.watch(
                                       getALbumArtProvider(allMusicFiles[
                                           currentIndex.value ?? 0]));
@@ -188,6 +198,8 @@ class HomeScreen extends ConsumerWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 IconButton(
+                                    color: _colorScheme.shuffleReapeatIconColor,
+                                    splashRadius: 0.1,
                                     onPressed: () {
                                       player.setLoopMode();
                                       _loopMode.state =
@@ -199,6 +211,8 @@ class HomeScreen extends ConsumerWidget {
                                             ? Icon(Icons.repeat_one_on_outlined)
                                             : Icon(Icons.repeat_on_outlined)),
                                 IconButton(
+                                    color: _colorScheme.shuffleReapeatIconColor,
+                                    splashRadius: 0.1,
                                     onPressed: () {
                                       player.setShuffleMode();
                                       _shuffleMode.state =
@@ -235,7 +249,10 @@ class HomeScreen extends ConsumerWidget {
       children: [
         Text(
           name,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          style: TextStyle(
+              color: _colorScheme.allMusicListSongNameColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w700),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -243,14 +260,14 @@ class HomeScreen extends ConsumerWidget {
           artist,
           maxLines: 1,
           overflow: TextOverflow.clip,
+          style: TextStyle(color: _colorScheme.allMusicListArtistNameColor),
         ),
       ],
     );
   }
-  // @override
-  // void dispose() {
-  //   // TODO: implement dispose
-  //   super.dispose();
-  //   _player.dispose();
-  // }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

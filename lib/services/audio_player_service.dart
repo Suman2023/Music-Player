@@ -65,6 +65,7 @@ class AudioPlayerService {
     if (_player.hasNext) {
       _player.seekToNext();
     } else {
+      _player.seek(Duration(milliseconds: 0), index: _player.currentIndex);
       _player.play();
     }
   }
