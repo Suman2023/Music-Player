@@ -1,6 +1,6 @@
 # music_player
 
-A Minimilaistic Music Player for Android
+### A Minimalistic Music Player for Android
 
 ## Todo
 
