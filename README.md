@@ -2,6 +2,12 @@
 
 A Minimilaistic Music Player for Android
 
+## Todo
+
+### Sliding transition [Horizontal]
+
+### Update Settings Screen
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
