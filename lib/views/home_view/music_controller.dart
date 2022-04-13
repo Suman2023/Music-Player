@@ -175,18 +175,21 @@ class _MusicControllerState extends ConsumerState<MusicController>
               print("music controller");
               return playerState.when(
                   data: (_data) {
+                    _data.playing
+                        ? _playPauseController.forward()
+                        : _playPauseController.reverse();
                     return IconButton(
                       color: _colorScheme.songControllerColor,
                       padding: EdgeInsets.zero,
                       onPressed: () {
                         _data.playing
                             ? {
-                                _playPauseController.reverse(),
+                                // _playPauseController.reverse(),
                                 player.pause(),
                                 _isPlayingState.state = false,
                               }
                             : {
-                                _playPauseController.forward(),
+                                // _playPauseController.forward(),
                                 player.play(),
                                 _isPlayingState.state = true,
                               };

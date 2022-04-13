@@ -1,13 +1,22 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:music_player/color_pallete/all_colors.dart';
 import 'package:music_player/locator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:music_player/services/background_service.dart';
 import 'package:music_player/services/local_file_service.dart';
 import 'package:music_player/utils/routes.dart';
 
 void main() async {
   setUp();
+  await AudioService.init(
+    builder: () => BackgroundAudioController(),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.mycompany.myapp.channel.audio',
+      androidNotificationChannelName: 'Music playback',
+    ),
+  );
   await Hive.initFlutter();
   await Hive.openBox("musicplayerdata");
   runApp(const ProviderScope(

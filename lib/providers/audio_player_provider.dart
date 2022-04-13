@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/locator.dart';
-import 'package:music_player/providers/notifiers/position_notifier.dart';
 import 'package:music_player/services/audio_player_service.dart';
 
 final player = locator<AudioPlayerService>();

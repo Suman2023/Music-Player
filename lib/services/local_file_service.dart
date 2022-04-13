@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:music_player/locator.dart';
 import 'package:path/path.dart';
@@ -51,5 +52,16 @@ class LocalFileService {
     }
     print(_playlist.length);
     return _playlist;
+  }
+
+  Future<Map<String, dynamic>> getMusicFilesMetadata(String filePath) async {
+    Map<String, dynamic> result = {};
+    Metadata _metadata = await MetadataRetriever.fromFile(File(filePath));
+    result['trackname'] =
+        _metadata.trackName ?? filePath.split('/').last.split('.')[0];
+    var artistNames = _metadata.trackArtistNames;
+    result['artistname'] = artistNames != null ? artistNames[0] : null;
+    result['clipart'] = _metadata.albumArt;
+    return result;
   }
 }

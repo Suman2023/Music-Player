@@ -5,7 +5,7 @@ import 'package:just_audio/just_audio.dart';
 class AudioPlayerService {
   final AudioPlayer _player = AudioPlayer();
   final List<AudioSource> _audioSourceList = [];
-  var _count = 0;
+  final _count = 0;
 
   int get count => _count;
   AudioPlayer get player => _player;
@@ -39,9 +39,9 @@ class AudioPlayerService {
   //   await _player.audi
   // }
 
-  void play() {
+  Future<void> play() async {
     if (_player.audioSource != null) {
-      _player.play();
+      await _player.play();
     } else {
       // _player.play();
       // print(_player.playerState.playing.toString());
@@ -50,31 +50,32 @@ class AudioPlayerService {
     }
   }
 
-  void playAtIndex(Duration duration, int index) {
-    _player.seek(duration, index: index);
-    _player.play();
+  Future<void> playAtIndex(Duration duration, int index) async {
+    await _player.seek(duration, index: index);
+    await _player.play();
   }
 
-  void pause() {
+  Future<void> pause() async {
     if (_player.playing) {
-      _player.pause();
+      await _player.pause();
     }
   }
 
-  void playNext() {
+  Future<void> playNext() async {
     if (_player.hasNext) {
-      _player.seekToNext();
+      await _player.seekToNext();
     } else {
-      _player.seek(Duration(milliseconds: 0), index: _player.currentIndex);
-      _player.play();
+      await _player.seek(const Duration(milliseconds: 0),
+          index: _player.currentIndex);
+      await _player.play();
     }
   }
 
-  void playPrevious() {
+  Future<void> playPrevious() async {
     if (_player.hasPrevious) {
-      _player.seekToPrevious();
+      await _player.seekToPrevious();
     } else {
-      _player.play();
+      await _player.play();
     }
   }
 
@@ -130,7 +131,7 @@ class AudioPlayerService {
     return _player.shuffleModeEnabled;
   }
 
-  void stop() {
-    player.stop();
+  Future<void> stop() async {
+    await player.stop();
   }
 }
